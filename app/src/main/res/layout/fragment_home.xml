@@ -7,18 +7,28 @@
     android:weightSum="100"
     tools:context=".ui.home.HomeFragment">
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/map_view"
+    <TextView
+        android:id="@+id/tv_address"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="70" />
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="CURRENT LOCATION: "
+        android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/tv_zone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="CURRENT ZONE: "
+        android:textColor="@color/black" />
 
     <TextView
         android:id="@+id/tv_active"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="ACTIVE TICKET: "
+        tools:text="ACTIVE TICKET: "
         android:textColor="@color/black" />
 
     <TextView
@@ -26,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="TIME LEFT: "
+        tools:text="TIME LEFT: "
         android:textColor="@color/black" />
 
     <Button
@@ -35,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="26dp"
-        android:text="PAY TICKET"
+        android:text="BUY TICKET"
         android:textAlignment="center" />
 
 

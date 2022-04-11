@@ -1,53 +1,110 @@
 package com.example.parking.ui.home
 
+import android.Manifest
+import android.content.Context
+import android.location.*
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.example.parking.R
-import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import java.lang.Exception
-
+import com.example.parking.Utils.hasPermission
+import com.example.parking.data.*
+import com.example.parking.databinding.FragmentHomeBinding
+import java.util.*
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
-    private lateinit var mapView: MapView
-    private lateinit var googleMap: GoogleMap
+    private val geocoder by lazy { Geocoder(requireContext(), Locale.getDefault()) }
+    private lateinit var binding: FragmentHomeBinding
+    private val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+    private lateinit var locationManager: LocationManager
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val rootView = inflater.inflate(R.layout.fragment_home, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        mapView = rootView.findViewById(R.id.map_view)
-        mapView.onCreate(savedInstanceState)
+        binding = FragmentHomeBinding.bind(view)
 
-        mapView.onResume()
+        locationManager =
+            requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        trackLocation()
+    }
 
-        try {
-            MapsInitializer.initialize(requireContext())
-        } catch (e: Exception){
-            e.printStackTrace()
+    private val locationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            updateLocationDisplay(location)
+        }
+    }
+
+    private fun updateLocationDisplay(location: Location) {
+        val lat = location.latitude
+        val long = location.longitude
+        var address = ""
+
+        val addressList = geocoder.getFromLocation(lat, long, 1)
+        if (addressList.size > 0) {
+            address = addressList[0].getAddressLine(0)
+            "CURRENT LOCATION: $address".also { binding.tvAddress.text = it }
+        } else Toast.makeText(requireContext(), "Address not found", Toast.LENGTH_SHORT).show()
+        updateZoneDisplay(address)
+    }
+
+    private fun updateZoneDisplay(address: String) {
+        val streetName = address.split(",")[0].filter { it.isLetter() }
+
+        val zone = when{
+            firstZone.contains(streetName) -> 1
+            secondZone.contains(streetName) -> 2
+            thirdZone.contains(streetName) -> 3
+            else -> "None"
         }
 
-        mapView.getMapAsync(object : OnMapReadyCallback {
-            override fun onMapReady(map: GoogleMap) {
-                googleMap = map
+        "CURRENT ZONE: $zone".also { binding.tvZone.text = it }
+    }
 
-                val location = LatLng(-34.0, 151.0)
-                googleMap.addMarker(MarkerOptions().position(location).title("Custom location"))
-                val cameraPosition = CameraPosition.builder().target(location).zoom(12F).build()
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+    private fun trackLocation() {
+        if (hasPermission(locationPermission)) {
+            startTrackingLocation()
+        } else {
+            permReqLauncher.launch(arrayOf(locationPermission))
+        }
+    }
+
+    private fun startTrackingLocation() {
+        val criteria = Criteria()
+        criteria.accuracy = Criteria.ACCURACY_FINE
+
+        val provider = locationManager.getBestProvider(criteria, true)
+        val minTime = 1000L
+        val minDistance = 1.0f
+        try {
+            locationManager.requestLocationUpdates(
+                provider!!,
+                minTime,
+                minDistance,
+                locationListener
+            )
+        } catch (e: SecurityException) {
+            Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val permReqLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permission ->
+            val granted = permission.entries.all {
+                it.value == true
             }
-        })
+            if (granted) {
+                startTrackingLocation()
+            } else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
+        }
 
-        return rootView
+
+
+    override fun onPause() {
+        super.onPause()
+        locationManager.removeUpdates(locationListener)
     }
 
 }
