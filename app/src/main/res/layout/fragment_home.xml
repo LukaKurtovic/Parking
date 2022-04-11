@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="100"
+    tools:context=".ui.home.HomeFragment">
+
+
+
+    <TextView
+        android:id="@+id/tv_active"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="ACTIVE TICKET: "
+        android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/tv_time_left"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="TIME LEFT: "
+        android:textColor="@color/black" />
+
+    <Button
+        android:id="@+id/btn_pay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="26dp"
+        android:text="PAY TICKET"
+        android:textAlignment="center" />
+
+
+</LinearLayout>
