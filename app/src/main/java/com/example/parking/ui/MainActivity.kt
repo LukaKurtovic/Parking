@@ -7,23 +7,22 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.parking.R
-import com.google.android.gms.maps.OnMapReadyCallback
-
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.example.parking.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         val navController = findNavController(R.id.nav_host_fragment)
 
         val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment, R.id.transactionsFragment, R.id.profileFragment))
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        bottomNavigationView.setupWithNavController(navController)
+        binding.bottomNavigation.setupWithNavController(navController)
 
     }
 
