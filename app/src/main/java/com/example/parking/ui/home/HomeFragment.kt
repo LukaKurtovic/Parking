@@ -8,63 +8,42 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.parking.R
-import com.example.parking.Utils.hasPermission
-import com.example.parking.data.*
 import com.example.parking.databinding.FragmentHomeBinding
-import java.util.*
+import com.example.parking.utils.hasPermission
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
-    private val geocoder by lazy { Geocoder(requireContext(), Locale.getDefault()) }
     private lateinit var binding: FragmentHomeBinding
     private val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-    private lateinit var locationManager: LocationManager
+    private val locationManager by lazy { requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager }
+    private var zone: String = ""
+    private val viewModel: HomeViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentHomeBinding.bind(view)
 
-        locationManager =
-            requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
         trackLocation()
-    }
 
-    private val locationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            updateLocationDisplay(location)
+        binding.btnPay.setOnClickListener { onPayClicked() }
+
+        viewModel.address.observe(viewLifecycleOwner){
+            binding.tvAddress.text = "CURRENT LOCATION: $it"
         }
-    }
-
-    private fun updateLocationDisplay(location: Location) {
-        val lat = location.latitude
-        val long = location.longitude
-        var address = ""
-
-        val addressList = geocoder.getFromLocation(lat, long, 1)
-        if (addressList.size > 0) {
-            address = addressList[0].getAddressLine(0)
-            "CURRENT LOCATION: $address".also { binding.tvAddress.text = it }
-        } else Toast.makeText(requireContext(), "Address not found", Toast.LENGTH_SHORT).show()
-        updateZoneDisplay(address)
-    }
-
-    private fun updateZoneDisplay(address: String) {
-        val streetName = address.split(",")[0].filter { it.isLetter() }
-
-        val zone = when{
-            firstZone.contains(streetName) -> 1
-            secondZone.contains(streetName) -> 2
-            thirdZone.contains(streetName) -> 3
-            else -> "None"
+        viewModel.zone.observe(viewLifecycleOwner){
+            binding.tvZone.text = "CURRENT ZONE: $it"
+            zone = it
         }
-
-        "CURRENT ZONE: $zone".also { binding.tvZone.text = it }
     }
 
     private fun trackLocation() {
-        if (hasPermission(locationPermission)) {
+        if (requireContext().hasPermission(locationPermission)) {
             startTrackingLocation()
         } else {
             permReqLauncher.launch(arrayOf(locationPermission))
@@ -83,7 +62,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 provider!!,
                 minTime,
                 minDistance,
-                locationListener
+                viewModel.locationListener
             )
         } catch (e: SecurityException) {
             Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
@@ -100,11 +79,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             } else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
         }
 
-
+    private fun onPayClicked() {
+        val action = HomeFragmentDirections.actionGlobalBuyTicketDialogFragment(zone)
+        findNavController().navigate(action)
+    }
 
     override fun onPause() {
         super.onPause()
-        locationManager.removeUpdates(locationListener)
+        locationManager.removeUpdates(viewModel.locationListener)
     }
 
 }

@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="CURRENT LOCATION: "
-        android:textColor="@color/black" />
+        android:textColor="?attr/colorOnSecondary" />
 
     <TextView
         android:id="@+id/tv_zone"
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="CURRENT ZONE: "
-        android:textColor="@color/black" />
+        android:textColor="?attr/colorOnSecondary" />
 
     <TextView
         android:id="@+id/tv_active"
@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         tools:text="ACTIVE TICKET: "
-        android:textColor="@color/black" />
+        android:textColor="?attr/colorOnSecondary" />
 
     <TextView
         android:id="@+id/tv_time_left"
@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         tools:text="TIME LEFT: "
-        android:textColor="@color/black" />
+        android:textColor="?attr/colorOnSecondary" />
 
     <Button
         android:id="@+id/btn_pay"
