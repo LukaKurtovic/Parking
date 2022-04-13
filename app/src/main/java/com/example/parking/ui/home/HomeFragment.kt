@@ -16,6 +16,7 @@ import java.util.*
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
+
     private val geocoder by lazy { Geocoder(requireContext(), Locale.getDefault()) }
     private lateinit var binding: FragmentHomeBinding
     private val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
