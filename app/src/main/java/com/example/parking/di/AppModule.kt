@@ -2,6 +2,7 @@ package com.example.parking.di
 
 import android.app.Application
 import android.location.Geocoder
+import android.telephony.SmsManager
 import androidx.room.Room
 import com.example.parking.data.TicketDatabase
 import dagger.Module
@@ -14,13 +15,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
     @Singleton
     @Provides
     fun provideDatabase(
         app: Application
     ) = Room.databaseBuilder(app, TicketDatabase::class.java, "ticket_database")
-        .fallbackToDestructiveMigration()
         .build()
 
     @Provides
@@ -30,4 +29,7 @@ object AppModule {
     fun provideGeocoder(
         app: Application
     ) = Geocoder(app, Locale.getDefault())
+
+    @Provides
+    fun provideSmsManager(): SmsManager = SmsManager.getDefault()
 }

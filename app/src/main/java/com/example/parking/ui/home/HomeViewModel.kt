@@ -1,52 +1,33 @@
 package com.example.parking.ui.home
 
-import android.location.Geocoder
-import android.location.Location
-import android.location.LocationListener
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.example.parking.data.firstZone
-import com.example.parking.data.secondZone
-import com.example.parking.data.thirdZone
+import androidx.lifecycle.*
+import com.example.parking.data.*
+import com.example.parking.helpers.LocationHelper
+import com.example.parking.helpers.SmsHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val geocoder: Geocoder
+    private val ticketRepository: TicketRepository,
+    locationHelper: LocationHelper,
+    private val smsHelper: SmsHelper
 ) : ViewModel() {
+    val locationListener = locationHelper.locationListener
 
-    private var mutableAddress = MutableLiveData("Fetching location")
-    private var mutableZone = MutableLiveData("Fetching zone")
-    val address: LiveData<String> get() = mutableAddress
-    val zone: LiveData<String> get() = mutableZone
+    val ticketData = combine(
+        locationHelper.mutableAddress.asFlow(),
+        locationHelper.mutableZone.asFlow(),
+        locationHelper.mutableIsLocationInZone.asFlow()
+    ) { address, zone, isInZone ->
+        Triple(address, zone, isInZone)
+    }.asLiveData()
 
-    val locationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            updateAddress(location)
-        }
+    fun onConfirmClick(ticket: Ticket) = viewModelScope.launch {
+        ticketRepository.insert(ticket)
     }
 
-    private fun updateAddress(location: Location) {
-        val lat = location.latitude
-        val long = location.longitude
-
-        val addressList = geocoder.getFromLocation(lat, long, 1)
-        mutableAddress.value = if (addressList.size > 0) {
-            addressList[0].getAddressLine(0)
-        } else "Address couldn't be found"
-        updateZone(mutableAddress.value!!)
-    }
-
-    private fun updateZone(address: String) {
-        val streetName = address.split(",")[0].filter { it.isLetter() }
-
-        mutableZone.value = when {
-            firstZone.contains(streetName) -> "1"
-            secondZone.contains(streetName) -> "2"
-            thirdZone.contains(streetName) -> "3"
-            else -> "none"
-        }
-    }
+    fun sendSMS(zone: String) = smsHelper.sendSMS(zone)
 }

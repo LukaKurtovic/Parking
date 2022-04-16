@@ -8,7 +8,6 @@ import androidx.room.Query
 
 @Dao
 interface TicketDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(ticket: Ticket)
 

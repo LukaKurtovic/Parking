@@ -17,28 +17,30 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home) {
-
     private lateinit var binding: FragmentHomeBinding
     private val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+    private val smsPermission = Manifest.permission.SEND_SMS
     private val locationManager by lazy { requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager }
     private var zone: String = ""
     private val viewModel: HomeViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding = FragmentHomeBinding.bind(view)
-
         trackLocation()
-
-        binding.btnPay.setOnClickListener { onPayClicked() }
-
-        viewModel.address.observe(viewLifecycleOwner){
-            binding.tvAddress.text = "CURRENT LOCATION: $it"
+        binding.btnPay.apply {
+            setOnClickListener {
+                onPayClicked()
+            }
         }
-        viewModel.zone.observe(viewLifecycleOwner){
-            binding.tvZone.text = "CURRENT ZONE: $it"
-            zone = it
+
+        viewModel.ticketData.observe(viewLifecycleOwner) {
+            binding.apply {
+                "CURRENT LOCATION: ${it.first}".also { tvAddress.text = it }
+                "CURRENT ZONE: ${it.second}".also { tvZone.text = it }
+                btnPay.isEnabled = it.third
+                zone = it.second
+            }
         }
     }
 
@@ -46,14 +48,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (requireContext().hasPermission(locationPermission)) {
             startTrackingLocation()
         } else {
-            permReqLauncher.launch(arrayOf(locationPermission))
+            permReqLauncher.launch(arrayOf(locationPermission, smsPermission))
         }
     }
 
     private fun startTrackingLocation() {
         val criteria = Criteria()
         criteria.accuracy = Criteria.ACCURACY_FINE
-
         val provider = locationManager.getBestProvider(criteria, true)
         val minTime = 1000L
         val minDistance = 1.0f
@@ -80,8 +81,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
     private fun onPayClicked() {
-        val action = HomeFragmentDirections.actionGlobalBuyTicketDialogFragment(zone)
-        findNavController().navigate(action)
+        HomeFragmentDirections.actionGlobalBuyTicketDialogFragment(zone)
+            .run { findNavController().navigate(this) }
     }
 
     override fun onPause() {
@@ -89,4 +90,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         locationManager.removeUpdates(viewModel.locationListener)
     }
 
+    override fun onResume() {
+        super.onResume()
+        trackLocation()
+    }
 }

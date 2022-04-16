@@ -11,18 +11,13 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class TransactionsFragment : Fragment(R.layout.fragment_transactions) {
-
-    val viewModel: TransactionsViewModel by viewModels()
-
+    private val viewModel: TransactionsViewModel by viewModels()
     private lateinit var binding: FragmentTransactionsBinding
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding = FragmentTransactionsBinding.bind(view)
-
         val transactionsAdapter = TransactionsAdapter()
-
         binding.apply {
             rvTransactions.apply {
                 adapter = transactionsAdapter
@@ -31,9 +26,8 @@ class TransactionsFragment : Fragment(R.layout.fragment_transactions) {
             }
         }
 
-        viewModel.tickets.observe(viewLifecycleOwner){
+        viewModel.tickets.observe(viewLifecycleOwner) {
             transactionsAdapter.submitList(it)
         }
-
     }
 }
