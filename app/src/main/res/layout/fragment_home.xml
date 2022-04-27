@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         tools:text="ACTIVE TICKET: "
-        android:textColor="?attr/colorOnSecondary" />
+        android:textColor="?attr/colorPrimary" />
 
     <TextView
         android:id="@+id/tv_time_left"
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         tools:text="TIME LEFT: "
-        android:textColor="?attr/colorOnSecondary" />
+        android:textColor="?attr/colorPrimary" />
 
     <Button
         android:id="@+id/btn_pay"
