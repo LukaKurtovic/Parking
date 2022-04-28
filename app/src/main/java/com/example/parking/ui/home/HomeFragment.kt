@@ -12,13 +12,11 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.parking.R
 import com.example.parking.databinding.FragmentHomeBinding
-import com.example.parking.utils.SharedPrefs
 import com.example.parking.utils.hasPermission
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home) {
-    private val prefs by lazy { SharedPrefs(requireContext()) }
     private lateinit var binding: FragmentHomeBinding
     private val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
     private val smsPermission = Manifest.permission.SEND_SMS
@@ -33,7 +31,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         trackLocation()
         binding.btnPay.apply {
             setOnClickListener {
-                if (prefs.getLicence().isNotBlank()) {
+                if (viewModel.getLicence().isNotBlank()) {
                     onPayClicked()
                 } else {
                     Toast.makeText(

@@ -20,5 +20,5 @@ class SharedPrefs @Inject constructor(
         }.commit()
     }
 
-    fun getLicence(): String = preferences.getString("LICENCE", "")!!
+    fun getLicence(): String = preferences.getString("LICENCE", "") ?: ""
 }

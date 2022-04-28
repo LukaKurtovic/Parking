@@ -5,6 +5,7 @@ import com.example.parking.data.*
 import com.example.parking.helpers.LocationHelper
 import com.example.parking.helpers.SmsHelper
 import com.example.parking.helpers.TimerHelper
+import com.example.parking.utils.SharedPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ class HomeViewModel @Inject constructor(
     locationHelper: LocationHelper,
     private val timerHelper: TimerHelper,
     private val smsHelper: SmsHelper,
+    private val prefs: SharedPrefs
 ) : ViewModel() {
     val locationListener = locationHelper.locationListener
     private val mutableActiveTicketZone = MutableLiveData("")
@@ -48,4 +50,6 @@ class HomeViewModel @Inject constructor(
     private fun startTimer() {
         timerHelper.countDownTimer.start()
     }
+
+    fun getLicence(): String = prefs.getLicence()
 }
