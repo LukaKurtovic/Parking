@@ -4,6 +4,8 @@ import androidx.lifecycle.*
 import com.example.parking.data.*
 import com.example.parking.helpers.LocationHelper
 import com.example.parking.helpers.SmsHelper
+import com.example.parking.helpers.TimerHelper
+import com.example.parking.utils.SharedPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -13,11 +15,14 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val ticketRepository: TicketRepository,
     locationHelper: LocationHelper,
-    private val smsHelper: SmsHelper
+    private val timerHelper: TimerHelper,
+    private val smsHelper: SmsHelper,
+    private val prefs: SharedPrefs
 ) : ViewModel() {
     val locationListener = locationHelper.locationListener
+    private val mutableActiveTicketZone = MutableLiveData("")
 
-    val ticketData = combine(
+    val currentLocationData = combine(
         locationHelper.mutableAddress.asFlow(),
         locationHelper.mutableZone.asFlow(),
         locationHelper.mutableIsLocationInZone.asFlow()
@@ -25,9 +30,26 @@ class HomeViewModel @Inject constructor(
         Triple(address, zone, isInZone)
     }.asLiveData()
 
+    val activeTicketData = combine(
+        timerHelper.mutableTimeLeft.asFlow(),
+        mutableActiveTicketZone.asFlow()
+    ) { timeLeft, activeZone ->
+        Pair(timeLeft, activeZone)
+    }.asLiveData()
+
     fun onConfirmClick(ticket: Ticket) = viewModelScope.launch {
         ticketRepository.insert(ticket)
+        startTimer()
     }
 
-    fun sendSMS(zone: String) = smsHelper.sendSMS(zone)
+    fun sendSMS(zone: String) {
+        smsHelper.sendSMS(zone)
+        mutableActiveTicketZone.value = zone
+    }
+
+    private fun startTimer() {
+        timerHelper.countDownTimer.start()
+    }
+
+    fun getLicence(): String = prefs.getLicence()
 }

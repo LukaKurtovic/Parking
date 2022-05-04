@@ -23,10 +23,15 @@
     <dialog
         android:id="@+id/buyTicketDialogFragment"
         android:name="com.example.parking.ui.buy_ticket.BuyTicketDialogFragment"
-        android:label="BuyTicketDialogFragment" >
+        android:label="BuyTicketDialogFragment">
         <argument
             android:name="zone"
             app:argType="string" />
     </dialog>
-    <action android:id="@+id/action_global_buyTicketDialogFragment" app:destination="@id/buyTicketDialogFragment" />
+    <action
+        android:id="@+id/action_global_buyTicketDialogFragment"
+        app:destination="@id/buyTicketDialogFragment" />
+    <action
+        android:id="@+id/action_global_profileFragment"
+        app:destination="@id/profileFragment" /><action android:id="@+id/action_global_homeFragment" app:destination="@id/homeFragment"/>
 </navigation>

@@ -5,6 +5,7 @@ import android.location.Geocoder
 import android.telephony.SmsManager
 import androidx.room.Room
 import com.example.parking.data.TicketDatabase
+import com.example.parking.helpers.TimerHelper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,4 +33,8 @@ object AppModule {
 
     @Provides
     fun provideSmsManager(): SmsManager = SmsManager.getDefault()
+
+    @Provides
+    @Singleton
+    fun provideTimerHelper(): TimerHelper = TimerHelper()
 }

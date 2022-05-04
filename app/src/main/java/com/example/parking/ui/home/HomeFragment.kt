@@ -27,19 +27,40 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentHomeBinding.bind(view)
+
         trackLocation()
         binding.btnPay.apply {
             setOnClickListener {
-                onPayClicked()
+                if (viewModel.getLicence().isNotBlank()) {
+                    onPayClicked()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "You have to enter the licence number first",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    HomeFragmentDirections.actionGlobalProfileFragment().run {
+                        findNavController().navigate(this)
+                    }
+                }
             }
         }
 
-        viewModel.ticketData.observe(viewLifecycleOwner) {
+        viewModel.currentLocationData.observe(viewLifecycleOwner) {
             binding.apply {
                 "CURRENT LOCATION: ${it.first}".also { tvAddress.text = it }
                 "CURRENT ZONE: ${it.second}".also { tvZone.text = it }
                 btnPay.isEnabled = it.third
                 zone = it.second
+            }
+        }
+
+        viewModel.activeTicketData.observe(viewLifecycleOwner) {
+            binding.apply {
+                if (it.first != 0L) {
+                    "TIME LEFT: ${it.first} seconds left".also { tvTimeLeft.text = it }
+                    "YOU HAVE A VALID TICKET FOR ZONE ${it.second}".also { tvActive.text = it }
+                } else "TIME LEFT: You don't have a valid ticket".also { tvTimeLeft.text = it }
             }
         }
     }
