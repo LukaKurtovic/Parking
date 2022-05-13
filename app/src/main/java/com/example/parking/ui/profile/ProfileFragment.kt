@@ -18,29 +18,31 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentProfileBinding.bind(view)
+        initUi()
+    }
 
-        binding.apply {
-            btnSave.setOnClickListener {
-                if (etLicence.text.isNotBlank()) {
-                    viewModel.addLicence(etLicence.text.toString())
-                    ProfileFragmentDirections.actionGlobalHomeFragment().run {
-                        findNavController().navigate(this)
-                    }
-                    Toast.makeText(requireContext(), "Licence saved", Toast.LENGTH_SHORT).show()
-                } else Toast.makeText(
-                    requireContext(),
-                    "Licence number cannot be empty!",
-                    Toast.LENGTH_SHORT
-                ).show()
+    private fun initUi() = with(binding) {
+        btnSave.setOnClickListener {
+            viewModel.addLicence(etLicence.text.toString())
+            // TODO: Move this check to the viewmodel
+            if (etLicence.text.isNotBlank()) {
+                viewModel.addLicence(etLicence.text.toString())
+                ProfileFragmentDirections.actionGlobalHomeFragment().run {
+                    findNavController().navigate(this)
+                }
+                Toast.makeText(requireContext(), getString(R.string.licence_saved), Toast.LENGTH_SHORT).show()
+            } else Toast.makeText(
+                requireContext(),
+                getString(R.string.licence_empty),
+                Toast.LENGTH_SHORT
+            ).show()
 
-            }
-            etLicence.setText(viewModel.getLicence())
         }
+        etLicence.setText(viewModel.getLicence())
     }
 
     override fun onResume() {
         super.onResume()
-
         binding.etLicence.setText(viewModel.getLicence())
     }
 }

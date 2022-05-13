@@ -6,10 +6,12 @@
         <entry key="app/src/main/res/drawable/ic_car.xml" value="0.163" />
         <entry key="app/src/main/res/drawable/ic_home.xml" value="0.163" />
         <entry key="app/src/main/res/drawable/ic_profile.xml" value="0.163" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.1828774062816616" />
-        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.3716577540106952" />
+        <entry key="app/src/main/res/layout/activity_extend_ticket.xml" value="0.2212962962962963" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_extend_ticket.xml" value="0.31614583333333335" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.2798456202216327" />
         <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.28804347826086957" />
-        <entry key="app/src/main/res/layout/fragment_transactions.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_transactions.xml" value="0.24444444444444444" />
         <entry key="app/src/main/res/layout/item_ticket.xml" value="0.2776268115942029" />
         <entry key="app/src/main/res/menu/bottom_menu.xml" value="0.18796296296296297" />
       </map>
