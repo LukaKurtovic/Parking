@@ -1,118 +1,111 @@
 package com.example.parking.ui.home
 
-import android.Manifest
+import android.app.NotificationManager
 import android.content.Context
-import android.location.*
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.parking.R
 import com.example.parking.databinding.FragmentHomeBinding
-import com.example.parking.utils.hasPermission
+import com.example.parking.helpers.ActivityResultCallback
+import com.example.parking.helpers.PermissionHelper
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(R.layout.fragment_home) {
+    @Inject lateinit var permissionHelper: PermissionHelper
     private lateinit var binding: FragmentHomeBinding
-    private val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-    private val smsPermission = Manifest.permission.SEND_SMS
-    private val locationManager by lazy { requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager }
     private var zone: String = ""
     private val viewModel: HomeViewModel by viewModels()
+    private lateinit var notificationManager: NotificationManager
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentHomeBinding.bind(view)
+        notificationManager =
+            requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancelAll()
 
-        trackLocation()
-        binding.btnPay.apply {
-            setOnClickListener {
-                if (viewModel.getLicence().isNotBlank()) {
-                    onPayClicked()
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        "You have to enter the licence number first",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    HomeFragmentDirections.actionGlobalProfileFragment().run {
-                        findNavController().navigate(this)
-                    }
+        binding.btnPay.setOnClickListener {
+            if (viewModel.getLicence().isNotBlank()) {
+                onBuyClicked()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.licence_empty),
+                    Toast.LENGTH_SHORT
+                ).show()
+                HomeFragmentDirections.actionGlobalProfileFragment().run {
+                    findNavController().navigate(this)
                 }
             }
         }
 
-        viewModel.currentLocationData.observe(viewLifecycleOwner) {
+        binding.apply {
+            btnLocate.setOnClickListener {
+                permissionHelper.withPermission(permissionHelper.locationPermission,
+                    { viewModel.fetchLocation() },
+                    { locationPermissionLauncher.launch(arrayOf(permissionHelper.locationPermission)) }
+                )
+                loadingIcon.isVisible = true
+            }
+        }
+
+        viewModel.locationInfo.observe(viewLifecycleOwner) {
             binding.apply {
-                "CURRENT LOCATION: ${it.first}".also { tvAddress.text = it }
-                "CURRENT ZONE: ${it.second}".also { tvZone.text = it }
-                btnPay.isEnabled = it.third
-                zone = it.second
+                "CURRENT ADDRESS: ${it.address}".also { tvAddress.text = it }
+                "CURRENT ZONE: ${it.zone}".also { tvZone.text = it }
+                binding.loadingIcon.isVisible = false
+                btnPay.isEnabled = it.isInZone
+                zone = it.zone
             }
         }
 
-        viewModel.activeTicketData.observe(viewLifecycleOwner) {
-            binding.apply {
-                if (it.first != 0L) {
-                    "TIME LEFT: ${it.first} seconds left".also { tvTimeLeft.text = it }
-                    "YOU HAVE A VALID TICKET FOR ZONE ${it.second}".also { tvActive.text = it }
-                } else "TIME LEFT: You don't have a valid ticket".also { tvTimeLeft.text = it }
-            }
-        }
-    }
+        viewModel.resumeIfRunning()
 
-    private fun trackLocation() {
-        if (requireContext().hasPermission(locationPermission)) {
-            startTrackingLocation()
-        } else {
-            permReqLauncher.launch(arrayOf(locationPermission, smsPermission))
+        viewModel.timeLeft.observe(viewLifecycleOwner) {
+            if (it != 0L) binding.tvTimeLeft.text = "TIME LEFT: $it min"
+            else binding.tvTimeLeft.text = getString(R.string.no_active_ticket)
         }
-    }
-
-    private fun startTrackingLocation() {
-        val criteria = Criteria()
-        criteria.accuracy = Criteria.ACCURACY_FINE
-        val provider = locationManager.getBestProvider(criteria, true)
-        val minTime = 1000L
-        val minDistance = 1.0f
-        try {
-            locationManager.requestLocationUpdates(
-                provider!!,
-                minTime,
-                minDistance,
-                viewModel.locationListener
-            )
-        } catch (e: SecurityException) {
-            Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private val permReqLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permission ->
-            val granted = permission.entries.all {
-                it.value == true
-            }
-            if (granted) {
-                startTrackingLocation()
-            } else Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
-        }
-
-    private fun onPayClicked() {
-        HomeFragmentDirections.actionGlobalBuyTicketDialogFragment(zone)
-            .run { findNavController().navigate(this) }
     }
 
     override fun onPause() {
         super.onPause()
-        locationManager.removeUpdates(viewModel.locationListener)
+        viewModel.stopTimer()
     }
 
-    override fun onResume() {
-        super.onResume()
-        trackLocation()
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+        ActivityResultCallback({ viewModel.fetchLocation() }, ::showPermissionNotGranted)
+    )
+
+    private val smsPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+        ActivityResultCallback({ navigateToBuyTicketDialog() }, ::showPermissionNotGranted)
+    )
+
+    private fun showPermissionNotGranted() {
+        Toast.makeText(
+            requireContext(),
+            getString(R.string.permission_denied_message),
+            Toast.LENGTH_SHORT
+        ).show()
     }
+
+    private fun onBuyClicked() {
+        permissionHelper.withPermission(permissionHelper.smsPermission,
+            { navigateToBuyTicketDialog() },
+            { smsPermissionLauncher.launch(arrayOf(permissionHelper.smsPermission)) })
+
+    }
+
+    private fun navigateToBuyTicketDialog() =
+        HomeFragmentDirections.actionGlobalBuyTicketDialogFragment(zone)
+            .run { findNavController().navigate(this) }
 }

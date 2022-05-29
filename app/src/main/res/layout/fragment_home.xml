@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:weightSum="100"
     tools:context=".ui.home.HomeFragment">
 
+    <ProgressBar
+        android:id="@+id/loading_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_locate"
+        android:progressBackgroundTint="@color/black"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/tv_address"
@@ -14,23 +24,17 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="CURRENT LOCATION: "
-        android:textColor="?attr/colorOnSecondary" />
+        android:textColor="?attr/colorOnSecondary"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/tv_zone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/default_margin_16"
         android:text="CURRENT ZONE: "
-        android:textColor="?attr/colorOnSecondary" />
-
-    <TextView
-        android:id="@+id/tv_active"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        tools:text="ACTIVE TICKET: "
-        android:textColor="?attr/colorPrimary" />
+        android:textColor="?attr/colorOnSecondary"
+        app:layout_constraintTop_toBottomOf="@id/tv_address"/>
 
     <TextView
         android:id="@+id/tv_time_left"
@@ -38,16 +42,33 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         tools:text="TIME LEFT: "
-        android:textColor="?attr/colorPrimary" />
+        android:textColor="?attr/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@id/tv_zone"/>
 
     <Button
         android:id="@+id/btn_pay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="26dp"
+        android:layout_marginTop="200dp"
         android:text="BUY TICKET"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@id/tv_time_left"
+        app:layout_constraintStart_toStartOf="@id/tv_time_left"/>
+
+    <Button
+        android:id="@+id/btn_locate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="200dp"
+        android:layout_marginStart="10dp"
+        android:textColor="@color/design_default_color_primary"
+        android:text="LOCATE ME"
+        android:textAlignment="center"
+        app:layout_constraintStart_toEndOf="@id/btn_pay"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        app:layout_constraintTop_toBottomOf="@id/tv_time_left"/>
 
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

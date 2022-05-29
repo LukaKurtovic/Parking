@@ -1,16 +1,24 @@
 package com.example.parking.di
 
+import android.app.AlarmManager
 import android.app.Application
+import android.app.NotificationManager
+import android.content.Context
 import android.location.Geocoder
+import android.location.LocationManager
 import android.telephony.SmsManager
 import androidx.room.Room
 import com.example.parking.data.TicketDatabase
-import com.example.parking.helpers.TimerHelper
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -35,6 +43,12 @@ object AppModule {
     fun provideSmsManager(): SmsManager = SmsManager.getDefault()
 
     @Provides
-    @Singleton
-    fun provideTimerHelper(): TimerHelper = TimerHelper()
+    fun provideLocationManager(
+        @ApplicationContext context: Context
+    ): LocationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    @Provides
+    fun provideAlarmManager(
+        @ApplicationContext context: Context
+    ): AlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 }

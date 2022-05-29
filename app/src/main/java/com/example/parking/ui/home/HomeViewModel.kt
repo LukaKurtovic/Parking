@@ -2,54 +2,62 @@ package com.example.parking.ui.home
 
 import androidx.lifecycle.*
 import com.example.parking.data.*
-import com.example.parking.helpers.LocationHelper
-import com.example.parking.helpers.SmsHelper
-import com.example.parking.helpers.TimerHelper
+import com.example.parking.helpers.*
 import com.example.parking.utils.SharedPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val ticketRepository: TicketRepository,
-    locationHelper: LocationHelper,
+    private val locationHelper: LocationHelper,
     private val timerHelper: TimerHelper,
     private val smsHelper: SmsHelper,
-    private val prefs: SharedPrefs
+    private val prefs: SharedPrefs,
+    private val alarmHelper: AlarmHelper
 ) : ViewModel() {
-    val locationListener = locationHelper.locationListener
-    private val mutableActiveTicketZone = MutableLiveData("")
+    val locationInfo = locationHelper.locationInfo.asLiveData()
+    val timeLeft = timerHelper.timeLeft.asLiveData()
 
-    val currentLocationData = combine(
-        locationHelper.mutableAddress.asFlow(),
-        locationHelper.mutableZone.asFlow(),
-        locationHelper.mutableIsLocationInZone.asFlow()
-    ) { address, zone, isInZone ->
-        Triple(address, zone, isInZone)
-    }.asLiveData()
-
-    val activeTicketData = combine(
-        timerHelper.mutableTimeLeft.asFlow(),
-        mutableActiveTicketZone.asFlow()
-    ) { timeLeft, activeZone ->
-        Pair(timeLeft, activeZone)
-    }.asLiveData()
-
-    fun onConfirmClick(ticket: Ticket) = viewModelScope.launch {
-        ticketRepository.insert(ticket)
+    fun onConfirmClick(ticket: Ticket) {
+        viewModelScope.launch {
+            ticketRepository.insert(ticket)
+        }
+        alarmHelper.setAlarm(System.currentTimeMillis() + 10000)
+        prefs.addTimeToFinish(System.currentTimeMillis() + 3600000)
         startTimer()
+
+    }
+
+    private fun startTimer() {
+        if (timerHelper.countDownTimer != null) stopTimer()
+        val millisInFuture = when (prefs.getTimeToFinish()) {
+            0L -> ONE_HOUR
+            else -> prefs.getTimeToFinish() - System.currentTimeMillis()
+        }
+
+        timerHelper.startTimer(millisInFuture)
     }
 
     fun sendSMS(zone: String) {
         smsHelper.sendSMS(zone)
-        mutableActiveTicketZone.value = zone
-    }
-
-    private fun startTimer() {
-        timerHelper.countDownTimer.start()
+        prefs.addLastTicket(zone)
     }
 
     fun getLicence(): String = prefs.getLicence()
+
+    fun fetchLocation() = locationHelper.fetchLocation()
+
+    fun resumeIfRunning() {
+        if (prefs.getTimeToFinish() != 0L) startTimer()
+    }
+
+    fun stopTimer() {
+        timerHelper.stopTimer()
+    }
+
 }
+
+private const val ONE_HOUR = 3600000L

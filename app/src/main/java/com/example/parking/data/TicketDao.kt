@@ -13,4 +13,5 @@ interface TicketDao {
 
     @Query("SELECT * FROM Ticket ORDER BY timestamp DESC")
     fun getAllTickets(): LiveData<List<Ticket>>
+
 }

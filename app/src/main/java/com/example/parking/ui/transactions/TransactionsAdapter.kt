@@ -10,10 +10,8 @@ import com.example.parking.databinding.ItemTicketBinding
 
 class TransactionsAdapter : ListAdapter<Ticket, TransactionsViewHolder>(DiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionsViewHolder {
-        val binding = ItemTicketBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return TransactionsViewHolder(binding)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        TransactionsViewHolder.create(parent)
 
     override fun onBindViewHolder(holder: TransactionsViewHolder, position: Int) {
         val currentItem = getItem(position)

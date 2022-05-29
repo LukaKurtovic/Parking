@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">parking</string>
+    <string name="dialog_title">Are you sure?</string>
+    <string name="dialog_message">You are buying a parking ticket for zone</string>
+    <string name="permission_denied_message">Permissions needed</string>
+    <string name="ticket_bought_messsage">Ticket bought successfully!</string>
+    <string name="invalid_address">Address couldn\'t be found,</string>
+    <string name="licence_empty">You have to enter the licence number first</string>
+    <string name="no_active_ticket">YOU HAVE NO ACTIVE PARKING TICKETS</string>
+    <string name="licence_saved">Licence saved</string>
+    <string name="notification_button_message">Extend for 1 hour</string>
+    <string name="notification_title">REMINDER</string>
+    <string name="notification_message">Ticket expires in 5 minutes!</string>
+
 </resources>
