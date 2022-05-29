@@ -1,10 +1,17 @@
 package com.example.parking.helpers
 
+import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.telephony.SmsManager
+import com.example.parking.utils.ExtendTicketService
 import com.example.parking.utils.SharedPrefs
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class SmsHelper @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val smsManager: SmsManager,
     private val prefs: SharedPrefs
 ) {

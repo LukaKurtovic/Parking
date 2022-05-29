@@ -29,9 +29,17 @@ class SharedPrefs @Inject constructor(
         }.commit()
     }
 
-    fun getLastTicket(): String = preferences.getString(LAST_TICKET, "") ?: ""
+    fun addTimeToFinish(time: Long) {
+        editor.apply {
+            putLong(TIME_TO_FINISH, time)
+        }.commit()
+    }
+
+    fun getTimeToFinish(): Long = preferences.getLong(TIME_TO_FINISH, 0L)
+
 }
 
 private const val PREFERENCES = "preferences"
 private const val LICENCE = "licence"
 private const val LAST_TICKET = "last_ticket"
+private const val TIME_TO_FINISH = "time_to_finish"

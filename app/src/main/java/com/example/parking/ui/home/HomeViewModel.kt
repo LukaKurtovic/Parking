@@ -7,6 +7,7 @@ import com.example.parking.utils.SharedPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -24,8 +25,20 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             ticketRepository.insert(ticket)
         }
-        timerHelper.countDownTimer.start()
         alarmHelper.setAlarm(System.currentTimeMillis() + 10000)
+        prefs.addTimeToFinish(System.currentTimeMillis() + 3600000)
+        startTimer()
+
+    }
+
+    private fun startTimer() {
+        if (timerHelper.countDownTimer != null) stopTimer()
+        val millisInFuture = when (prefs.getTimeToFinish()) {
+            0L -> ONE_HOUR
+            else -> prefs.getTimeToFinish() - System.currentTimeMillis()
+        }
+
+        timerHelper.startTimer(millisInFuture)
     }
 
     fun sendSMS(zone: String) {
@@ -35,7 +48,16 @@ class HomeViewModel @Inject constructor(
 
     fun getLicence(): String = prefs.getLicence()
 
-    fun getLastTicket(): String = prefs.getLastTicket()
-
     fun fetchLocation() = locationHelper.fetchLocation()
+
+    fun resumeIfRunning() {
+        if (prefs.getTimeToFinish() != 0L) startTimer()
+    }
+
+    fun stopTimer() {
+        timerHelper.stopTimer()
+    }
+
 }
+
+private const val ONE_HOUR = 3600000L

@@ -51,9 +51,4 @@ object AppModule {
     fun provideAlarmManager(
         @ApplicationContext context: Context
     ): AlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-    @Provides
-    fun provideNotificationManager(
-        @ApplicationContext context: Context
-    ): NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 }

@@ -1,24 +1,35 @@
 package com.example.parking.helpers
 
 import android.os.CountDownTimer
+import com.example.parking.App
+import com.example.parking.ui.MainActivity
+import com.example.parking.utils.SharedPrefs
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.properties.Delegates
 
 @Singleton
-class TimerHelper @Inject constructor() {
+class TimerHelper @Inject constructor(
+    private val prefs: SharedPrefs
+) {
     val timeLeft = MutableStateFlow(0L)
+    var countDownTimer: CountDownTimer? = null
 
-    val countDownTimer = object : CountDownTimer(MILLIS_IN_FUTURE, COUNT_DOWN_INTERVAL) {
-        override fun onTick(millisUntilFinished: Long) {
-            timeLeft.value = millisUntilFinished / 60000
-        }
+    fun startTimer(millisInFuture: Long) {
+        countDownTimer =
+            object : CountDownTimer(millisInFuture, COUNT_DOWN_INTERVAL) {
+                override fun onTick(millisUntilFinished: Long) {
+                    timeLeft.value = millisUntilFinished / 1000 / 60
+                }
 
-        override fun onFinish() {
-            return
-        }
+                override fun onFinish() {
+                    prefs.addTimeToFinish(0L)
+                }
+            }.start()
     }
+
+    fun stopTimer() = countDownTimer?.cancel()
 }
 
-private const val MILLIS_IN_FUTURE = 3600000L
-private const val COUNT_DOWN_INTERVAL = 1000L
+const val COUNT_DOWN_INTERVAL = 1000L

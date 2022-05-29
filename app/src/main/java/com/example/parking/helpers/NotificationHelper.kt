@@ -12,7 +12,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.parking.R
-import com.example.parking.ui.MainActivity
+import com.example.parking.utils.ExtendTicketService
 
 const val EXTEND_KEY = "extend"
 const val EXTEND_VALUE = "extend"
@@ -43,17 +43,18 @@ class NotificationHelper(base: Context?) : ContextWrapper(base) {
 
     @SuppressLint("UnspecifiedImmutableFlag")
     fun getChannelNotification(title: String, message: String): NotificationCompat.Builder {
-        val intent = Intent(applicationContext, MainActivity::class.java)
+        val intent = Intent(applicationContext, ExtendTicketService::class.java)
         intent.putExtra(EXTEND_KEY, EXTEND_VALUE)
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         val pendingIntent =
-            PendingIntent.getActivity(applicationContext, 1, intent, PendingIntent.FLAG_ONE_SHOT)
+            PendingIntent.getService(applicationContext, 1, intent, PendingIntent.FLAG_ONE_SHOT)
 
         return NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setContentTitle(title)
             .setContentText(message)
             .setSmallIcon(R.drawable.ic_car)
             .addAction(0, "Extend for 1 hour", pendingIntent)
+
     }
 }
 
